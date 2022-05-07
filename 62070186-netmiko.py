@@ -3,7 +3,7 @@ from jinja2 import Template
 from netmiko import ConnectHandler
 
 # import jinja2 file template
-student_code = '{student_code}'
+student_code = '62070186'
 template_file = open('manage_loopback.j2', 'r').read()
 jinja_template = Template(template_file)
 
