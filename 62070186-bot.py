@@ -8,7 +8,7 @@ interface_status_api_url = f'https://10.0.15.113/restconf/data/ietf-interfaces:i
 
 webex_room = 'NPA2021@ITKMITL'
 webex_apt_url = 'https://webexapis.com'
-webex_api_token = 'ZGMwNjYyZDMtYjgwZC00MmEwLWEzMjctYWUxM2MzYWU4Nzc0YTVlYzFiNDctMTk1_P0A1_f1f3518a-8e80-4525-82c8-62356e77eae1'
+webex_api_token = 'webex-api-token-here' # hide webex api token for security
 
 def check_interface_status():
     """ check interface status when lastest message is student_code """

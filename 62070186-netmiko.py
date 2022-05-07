@@ -3,6 +3,7 @@ from jinja2 import Template
 from netmiko import ConnectHandler
 
 # import jinja2 file template
+student_code = '{student_code}'
 template_file = open('manage_loopback.j2', 'r').read()
 jinja_template = Template(template_file)
 
@@ -19,7 +20,7 @@ with ConnectHandler(**device_params) as ssh:
     # default method will be create loopback interface
     method = 'create'
     with open('cisco_ios_show_interfaces.textfsm') as template_file:
-        interface = ssh.send_command('show interfaces L62070186')
+        interface = ssh.send_command(f'show interfaces L{student_code}')
         textfsm_template = textfsm.TextFSM(template_file)
         interface = textfsm_template.ParseText(interface)
         if interface:
@@ -29,7 +30,7 @@ with ConnectHandler(**device_params) as ssh:
     # generate set of command from jinja2
     commands = jinja_template.render(
         method = method,
-        interface = 'Loopback 62070186',
+        interface = f'Loopback {student_code}',
         ip = '192.168.1.1',
         subnet = '255.255.255.0'
     ).splitlines()
