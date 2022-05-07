@@ -1,8 +1,4 @@
-{% for interface in interfaces %}
- {% if interface.Type == "Loopback" %}
-  interface {{ interface.Interface }}
+interface {{ interface }}
    no shutdown
-   ip address {{ interface.IP }} {{ interface.Subnet }}
+   ip address {{ ip }} {{ subnet }}
    exit
- {% endif %}
-{% endfor %}
