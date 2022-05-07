@@ -2,9 +2,10 @@ import time
 import json
 import requests
 from requests_toolbelt.multipart.encoder import MultipartEncoder
+requests.packages.urllib3.disable_warnings()
 
 student_code = '62070186'
-interface_status_api_url = f'https://10.0.15.113/restconf/data/ietf-interfaces:interfaces/interface=Loopback{student_code}/enabled'
+interface_status_api_url = f'https://10.0.15.113/restconf/data/ietf-interfaces:interfaces-state/interface=Loopback{student_code}/oper-status'
 
 webex_room = 'NPA2021@ITKMITL'
 webex_apt_url = 'https://webexapis.com'
@@ -12,8 +13,6 @@ webex_api_token = 'webex-api-token-here' # hide webex api token for security
 
 def check_interface_status():
     """ check interface status when lastest message is student_code """
-    requests.packages.urllib3.disable_warnings()
-
     headers = {
         'Accept': 'application/yang-data+json', 
         'Content-type':'application/yang-data+json'
@@ -23,10 +22,10 @@ def check_interface_status():
 
     if not response.ok:
         print(f'Error Status Code ({response.status_code}): Device api url error or interface not found')
-        return []
+        return 'down'
 
     response_json = response.json()
-    return response_json['ietf-interfaces:enabled']
+    return response_json['ietf-interfaces:oper-status']
 
 def webex_post_message(webex_room_id, text):
     """ post interface status to webex room """
@@ -81,10 +80,7 @@ def check_lastest_message(webex_room_id, webex_lastest_message_id):
     if len(message['items']) and webex_lastest_message_id != message['items'][0]['id']:
         print('Received message: ' + message['items'][0]['text'])
         if message['items'][0]['text'] == student_code:
-            if check_interface_status():
-                webex_post_message(webex_room_id, f'Loopback{student_code} - Operational status is up')
-            else:
-                webex_post_message(webex_room_id, f'Loopback{student_code} - Operational status is down')
+            webex_post_message(webex_room_id, f'Loopback{student_code} - Operational status is {check_interface_status()}')
     return message['items'][0]['id']
 
 
