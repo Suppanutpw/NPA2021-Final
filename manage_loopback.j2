@@ -1,8 +1,0 @@
-{% if method == 'create' %}
- interface {{ interface }}
-  no shutdown
-  ip address {{ ip }} {{ subnet }}
-  exit
-{% elif method == 'delete' %}
- no interface {{ interface }}
-{% endif %}
