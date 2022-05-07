@@ -1,6 +1,7 @@
 import time
 import json
 import requests
+from requests_toolbelt.multipart.encoder import MultipartEncoder
 
 interface_status_api_url = 'https://10.0.15.113/restconf/data/ietf-interfaces:interfaces/interface=Loopback62070186/enabled'
 
@@ -21,10 +22,26 @@ def check_interface_status():
 
     if(response.status_code < 200 or response.status_code >= 300):
         print('Error. Status Code: {} \nError message: {}'.format( response.status_code,json.dumps(response.json(), indent=4)))
-        return
+        return []
 
     response_json = response.json()
     return response_json['ietf-interfaces:enabled']
+
+def webex_post_message(webex_room_id, text):
+    webex_post_message_url = webex_apt_url + '/v1/messages'
+    msg = MultipartEncoder({
+        'roomId': webex_room_id,
+        'text': text
+    })
+    headers = {
+        'Authorization': f'Bearer {webex_api_token}',
+        'Content-Type': msg.content_type,
+    }
+    response = requests.post(webex_post_message_url, data=msg, headers=headers, verify=False)
+
+    if(response.status_code < 200 or response.status_code >= 300):
+        print('Error. Status Code: {} \nError message: {}'.format( response.status_code,json.dumps(response.json(), indent=4)))
+        return
 
 def webex_find_room():
     webex_list_rooms_url = webex_apt_url + '/v1/rooms'
@@ -35,7 +52,7 @@ def webex_find_room():
     response = requests.get(webex_list_rooms_url, headers=headers)
     if(response.status_code < 200 or response.status_code >= 300):
         print('Error. Status Code: {} \nError message: {}'.format(response.status_code,json.dumps(response.json(), indent=4)))
-        return
+        return None
     rooms = response.json()
 
     for room in rooms['items']:
@@ -52,7 +69,7 @@ def check_lastest_message(webex_room_id, webex_lastest_message_id):
     response = requests.get(webex_lastest_message_url, headers=headers)
     if(response.status_code < 200 or response.status_code >= 300):
         print('Error. Status Code: {} \nError message: {}'.format(response.status_code,json.dumps(response.json(), indent=4)))
-        return
+        return ''
     message = response.json()
 
     if not message['items']:
@@ -60,8 +77,12 @@ def check_lastest_message(webex_room_id, webex_lastest_message_id):
 
     if len(message['items']) and webex_lastest_message_id != message['items'][0]['id']:
         print('Received message: ' + message['items'][0]['text'])
+        if message['items'][0]['text'] == '62070186':
+            if check_interface_status():
+                webex_post_message(webex_room_id, "Loopback62070186 - Operational status is up")
+            else:
+                webex_post_message(webex_room_id, "Loopback62070186 - Operational status is down")
     return message['items'][0]['id']
-
 
 
 def main():
