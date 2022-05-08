@@ -17,15 +17,19 @@ device_params = {
 
 with ConnectHandler(**device_params) as ssh:
 
-    # default method will be create loopback interface
-    method = 'create'
+    # input selected method
+    method = input('Please Select Method (create|delete): ').lower()
     with open('cisco_ios_show_interfaces.textfsm') as template_file:
         interface = ssh.send_command(f'show interfaces L{student_code}')
         textfsm_template = textfsm.TextFSM(template_file)
         interface = textfsm_template.ParseText(interface)
-        if interface:
-            # if there already have interface, will change method to delete interface
-            method = 'delete'
+        if method == 'create' and interface:
+            # if there already have interface with correct config, will not create again
+            if interface[0][1] == 'up' and interface[0][7] == '192.168.1.1/24':
+                exit(f'Warning: Loopback{student_code} already create!')
+        elif method == 'delete' and not interface:
+            # if there already have no interface, will not delete again
+            exit(f'Warning: Loopback{student_code} not exist!')
 
     # generate set of command from jinja2
     commands = jinja_template.render(
