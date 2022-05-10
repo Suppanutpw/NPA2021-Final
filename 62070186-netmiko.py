@@ -15,10 +15,13 @@ device_params = {
   'password': 'cisco'
 }
 
-with ConnectHandler(**device_params) as ssh:
+# input selected method
+method = input('Please Select Method (create|delete): ').lower()
+if method not in ['create', 'delete']:
+    # if selected method is not valid, will return error
+    exit(f'Error: This program have no option {method}')
 
-    # input selected method
-    method = input('Please Select Method (create|delete): ').lower()
+with ConnectHandler(**device_params) as ssh:
     with open('cisco_ios_show_interfaces.textfsm') as template_file:
         interface = ssh.send_command(f'show interfaces L{student_code}')
         textfsm_template = textfsm.TextFSM(template_file)
