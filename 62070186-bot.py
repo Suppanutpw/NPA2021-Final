@@ -9,7 +9,7 @@ interface_noshut_api_url = f'https://10.0.15.113/restconf/data/ietf-interfaces:i
 
 webex_room = 'NPA2021@ITKMITL' # change room name here for testing
 webex_apt_url = 'https://webexapis.com'
-webex_api_token = 'NTAxYmQ4NTUtMzg1NS00MGYzLTg2MTAtYjMxM2JhMDZmNjc3ZTNkZjQwY2MtNjdl_P0A1_f1f3518a-8e80-4525-82c8-62356e77eae1' # please use your api token
+webex_api_token = 'your-webex-api-token' # please use your api token
 
 # RESTCONF to CSR1000v packet header
 device_headers = {
