@@ -7,7 +7,7 @@ student_code = '62070186'
 interface_status_api_url = f'https://10.0.15.113/restconf/data/ietf-interfaces:interfaces-state/interface=Loopback{student_code}/oper-status'
 interface_noshut_api_url = f'https://10.0.15.113/restconf/data/ietf-interfaces:interfaces/interface=Loopback{student_code}'
 
-webex_room = 'Webex space for Suppanut' # change room name here for testing
+webex_room = 'NPA2021@ITKMITL' # change room name here for testing
 webex_apt_url = 'https://webexapis.com'
 webex_api_token = 'NTAxYmQ4NTUtMzg1NS00MGYzLTg2MTAtYjMxM2JhMDZmNjc3ZTNkZjQwY2MtNjdl_P0A1_f1f3518a-8e80-4525-82c8-62356e77eae1' # please use your api token
 
@@ -100,9 +100,13 @@ def check_lastest_message(webex_room_id, webex_lastest_message_id):
 
                 if not response.ok:
                     print(f'Error Status Code ({response.status_code}): Device api url error or interface not found')
-                    return 'down'
+                    return webex_lastest_message_id
 
-                webex_post_message(webex_room_id, f'Loopback{student_code} - Operational status is {check_interface_status()}')
+                status = check_interface_status()
+                if status == 'up':
+                    webex_post_message(webex_room_id, f'Enable Loopback{student_code} - Now the Operational status is up again')
+                else:
+                    webex_post_message(webex_room_id, f'Enable Loopback{student_code} - Now the Operational status is still down')
 
     return message['items'][0]['id']
 
