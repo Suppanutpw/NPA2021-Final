@@ -5,14 +5,15 @@ requests.packages.urllib3.disable_warnings()
 
 student_code = '62070186'
 interface_status_api_url = f'https://10.0.15.113/restconf/data/ietf-interfaces:interfaces-state/interface=Loopback{student_code}/oper-status'
+interface_noshut_api_url = f'https://10.0.15.113/restconf/data/ietf-interfaces:interfaces/interface=Loopback{student_code}'
 
-webex_room = 'NPA2021@ITKMITL' # change room name here for testing
+webex_room = 'Webex space for Suppanut' # change room name here for testing
 webex_apt_url = 'https://webexapis.com'
-webex_api_token = 'webex-api-token-here' # please use your api token
+webex_api_token = 'NTAxYmQ4NTUtMzg1NS00MGYzLTg2MTAtYjMxM2JhMDZmNjc3ZTNkZjQwY2MtNjdl_P0A1_f1f3518a-8e80-4525-82c8-62356e77eae1' # please use your api token
 
 # RESTCONF to CSR1000v packet header
 device_headers = {
-    'Accept': 'application/yang-data+json', 
+    'Accept': 'application/yang-data+json',
     'Content-type':'application/yang-data+json'
 }
 basicauth = ('admin', 'cisco')
@@ -75,7 +76,34 @@ def check_lastest_message(webex_room_id, webex_lastest_message_id):
     if len(message['items']) and webex_lastest_message_id != message['items'][0]['id']:
         print('Received message: ' + message['items'][0]['text'])
         if message['items'][0]['text'] == student_code:
-            webex_post_message(webex_room_id, f'Loopback{student_code} - Operational status is {check_interface_status()}')
+            status = check_interface_status()
+            webex_post_message(webex_room_id, f'Loopback{student_code} - Operational status is {status}')
+            if status == 'down':
+                """ check interface status when lastest message is student_code """
+                yang_config = {
+                    "ietf-interfaces:interface": {
+                        "name": f"Loopback{student_code}",
+                        "type": "iana-if-type:softwareLoopback",
+                        "enabled": True,
+                        "ietf-ip:ipv4": {
+                            "address": [
+                                {
+                                    "ip": "192.168.1.1",
+                                    "netmask": "255.255.255.0"
+                                }
+                            ]
+                        },
+                        "ietf-ip:ipv6": {}
+                    }
+                }
+                response = requests.put(interface_noshut_api_url, data=json.dumps(yang_config), auth=basicauth, headers=device_headers, verify=False)
+
+                if not response.ok:
+                    print(f'Error Status Code ({response.status_code}): Device api url error or interface not found')
+                    return 'down'
+
+                webex_post_message(webex_room_id, f'Loopback{student_code} - Operational status is {check_interface_status()}')
+
     return message['items'][0]['id']
 
 
